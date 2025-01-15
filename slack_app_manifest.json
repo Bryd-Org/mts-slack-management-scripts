@@ -1,0 +1,37 @@
+{
+    "display_information": {
+        "name": "BrydSlackMigration"
+    },
+    "features": {
+        "bot_user": {
+            "display_name": "BrydSlackMigration",
+            "always_online": false
+        }
+    },
+    "oauth_config": {
+        "scopes": {
+            "user": [
+                "admin",
+                "admin.conversations:read",
+                "admin.conversations:write",
+                "admin.teams:read",
+                "admin.users:read",
+                "admin.users:write",
+                "channels:read",
+                "channels:write",
+                "groups:write",
+                "im:write",
+                "mpim:write",
+                "users:read"
+            ],
+            "bot": [
+                "users:read"
+            ]
+        }
+    },
+    "settings": {
+        "org_deploy_enabled": true,
+        "socket_mode_enabled": false,
+        "token_rotation_enabled": false
+    }
+}

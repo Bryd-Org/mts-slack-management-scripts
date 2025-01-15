@@ -1,0 +1,23 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "8ebc88e71ec4faedbd70adb58f86b1724c3c205ad3de000ff651140cd92b72d8"
+        },
+        "pipfile-spec": 6,
+        "requires": {},
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "dynaconf": "*",
+        "pydantic": "*",
+        "slack-bolt": "*",
+        "slack-sdk": "*"
+    },
+    "develop": {}
+}

@@ -1,0 +1,9 @@
+workspace_name,workspace_slack_id,channel_name,channel_slack_id,user_name,user_slack_id
+MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_1,U111111111
+MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_2,U222222222
+MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_3,U333333333
+MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_4,U444444444
+MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_5,U555555555
+MTS-IT,T12345678,it-all-technical-team,C98765432,mts-user_4,U444444444
+MTS-IT,T12345678,it-all-technical-team,C98765432,mts-user_5,U555555555
+
