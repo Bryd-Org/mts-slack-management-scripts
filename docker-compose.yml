@@ -1,0 +1,18 @@
+services:
+  add-users:
+    build: .
+    volumes:
+      - ./add_users_instruction.csv:/app/add_users_instruction.csv
+      - ./assign_user_admin_instruction.csv:/app/assign_user_admin_instruction.csv
+      - ./.secrets.toml:/app/.secrets.toml
+    command: python main.py add-users
+    restart: "no"
+
+  assign-admins:
+    build: .
+    volumes:
+      - ./add_users_instruction.csv:/app/add_users_instruction.csv
+      - ./assign_user_admin_instruction.csv:/app/assign_user_admin_instruction.csv
+      - ./.secrets.toml:/app/.secrets.toml
+    command: python main.py assign-admins
+    restart: "no"

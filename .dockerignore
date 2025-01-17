@@ -1,0 +1,11 @@
+.env
+*/__pycache__/
+Dockerfile*
+README.md
+.dockerignore
+docker-compose.yml
+.git/
+.gitignore
+.secrets.toml
+*.csv
+slack_app_manifest.json

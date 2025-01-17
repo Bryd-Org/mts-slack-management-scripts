@@ -1,10 +1,10 @@
 {
     "display_information": {
-        "name": "BrydSlackMigration"
+        "name": "SlackMigrationBot"
     },
     "features": {
         "bot_user": {
-            "display_name": "BrydSlackMigration",
+            "display_name": "SlackMigrationBot",
             "always_online": false
         }
     },

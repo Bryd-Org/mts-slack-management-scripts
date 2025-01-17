@@ -5,7 +5,7 @@ from datetime import datetime, UTC
 from slack_sdk import WebClient
 from slack_sdk.scim import SCIMClient, User as ScimUser
 
-from config import log
+from .config import log
 from data_models.channel import Channel
 from data_models.user import User
 from data_models.workspace import Workspace
@@ -21,6 +21,9 @@ class UnknownSlackUserCreationError(ValueError):
 
 class SlackConnectionManager:
     def __init__(self, token: str):
+        if not token:
+            raise ValueError("Slack Api token is required! ")
+
         self._slack_user_client = WebClient(token=token)
         self._scim_client = SCIMClient(token=token)
         self._debounce_data = {}
@@ -449,4 +452,18 @@ class SlackConnectionManager:
         await self._debounce("admin_conversations_convertToPrivate", 20)
         self._slack_user_client.admin_conversations_convertToPrivate(
             channel_id=channel.slack_id
+        )
+
+    async def make_user_admin(self, user_id: str, workspace_id: str):
+        await self._debounce("admin_users_setAdmin", 20)
+        self._slack_user_client.admin_users_setAdmin(
+            team_id=workspace_id,
+            user_id=user_id,
+        )
+
+    async def make_user_owner(self, user_id: str, workspace_id: str):
+        await self._debounce("admin_users_setOwner", 20)
+        self._slack_user_client.admin_users_setOwner(
+            team_id=workspace_id,
+            user_id=user_id,
         )
