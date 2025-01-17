@@ -95,7 +95,7 @@ You can now use this workspace ID in the `.env` file.
    which denote several channels user would be added to.
 
 2. **Run process**  
-   - Execute the following command to start sharing the channels:
+   - Execute the following command to add users to channels and workspaces:
      ```bash
      docker-compose up add-users
      ```
@@ -116,7 +116,7 @@ assigned to channels from `add_users_instruction.csv` file.
    Each line is a meant for a single user. User role should be in lowercase: `admin` or `owner`.
    
 2. **Run process**  
-   - Execute the following command to start sharing the channels:
+   - Execute the following command to assign admin or owner role:
      ```bash
      docker-compose up assign-admins
      ```
