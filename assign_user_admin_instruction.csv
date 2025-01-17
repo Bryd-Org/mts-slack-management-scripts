@@ -1,5 +1,5 @@
-workspace_name,workspace_slack_id,user_name,user_slack_id,role
-Test Workspace,T0123456789,John Doe,U0123456789,admin
-Test Workspace,T0123456789,Jane Doe,U9876543210,owner
-Test Workspace,T0123456789,Bob Smith,U0123456788,admin
-Test Workspace,T0123456789,Alice Brown,U9876543211,owner
+workspace_name,workspace_slack_id,user_email,user_slack_id,role
+Test Workspace,T0123456789,John Doe@example.com,U0123456789,admin
+Test Workspace,T0123456789,Jane Doe@example.com,U9876543210,owner
+Test Workspace,T0123456789,Bob Smith@example.com,U0123456788,admin
+Test Workspace,T0123456789,Alice Brown@example.com,U9876543211,owner
