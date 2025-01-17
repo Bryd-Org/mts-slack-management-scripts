@@ -111,20 +111,19 @@ assigned to channels from `add_users_instruction.csv` file.
 ### **Assign users as workspace owners and admins**
 
 1. **Prepare the instructions file**  
-   - Open the `add_users_instruction.csv` file.  
+   - Open the `assign_user_admin_instruction.csv` file.  
    - Populate it with `workspace_name`, `workspace_slack_id`, `user_name`, `user_slack_id,role`. 
-   Each line is a meant for a single user. A single user can have several lines
-   which denote several channels user would be added to.
-
+   Each line is a meant for a single user. User role should be in lowercase: `admin` or `owner`.
+   
 2. **Run process**  
    - Execute the following command to start sharing the channels:
      ```bash
-     docker-compose up add-users
+     docker-compose up assign-admins
      ```
 
 **Result:**  
 
-After execution, users which are not members of the workspace (or deactivated) would be invited to join workspace and 
-assigned to channels from `add_users_instruction.csv` file.
+
+After execution users from `assign_user_admin_instruction.csv` file would be assigned corresponding roles in their workspace.
 
 ---
