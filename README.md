@@ -49,7 +49,7 @@
    - Click on the **three dots menu** (⋮) next to the workspace name.  
    - Select **Copy Workspace ID** from the dropdown menu.
 
-You can now use this workspace ID in the `.env` file.
+You can now use this workspace ID in the instructions file.
 
 ---
 
@@ -67,6 +67,8 @@ You can now use this workspace ID in the `.env` file.
 4. **Copy the Channel ID**
    - Click on the **More** options (⋮) in the channel details pane, scroll down and select **Copy ID**.  
    It usually starts with a `C` or `G` followed by a series of letters and numbers.
+   
+You can now use this channel ID in the instructions file.
 
 ---
 
@@ -83,6 +85,8 @@ You can now use this workspace ID in the `.env` file.
 3. **Copy the User ID**
    - In address bar of the browser find the user ID after `/people/`.
    It usually starts with a `U` followed by a series of letters and numbers.
+
+You can now use this user ID in the instructions file.
 
 ---
 
