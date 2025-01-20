@@ -4,7 +4,6 @@ import typer
 
 from core.activate_users_add_to_channels import add_users_to_ws_channels
 from core.assign_owner_admin import assign_owner_admin
-from core.test import tester
 from utils.config import settings as s, log
 from utils.csv_manager import CSVInstructionManager
 from utils.slack_connector import SlackConnectionManager

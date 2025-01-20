@@ -391,7 +391,7 @@ class SlackConnectionManager:
         await self._debounce("admin_conversations_invite", 20)
         self._slack_user_client.admin_conversations_invite(
             user_ids=user_id,
-            channel_ids=channel_slack_id,
+            channel_id=channel_slack_id,
         )
 
     async def get_users_of_workspace(
