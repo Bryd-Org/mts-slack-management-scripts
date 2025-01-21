@@ -90,7 +90,35 @@ You can now use this user ID in the instructions file.
 
 ---
 
-### **Add users to workspaces and channels**
+### **Script container testing** (*test*)
+
+All the scripts here are run as linux docker containers. To verify that you operating system is able to run 
+them you might use this test command. No additional preparation required.
+
+   
+1. **Run process**  
+   - Execute the following command to assign admin or owner role:
+     ```bash
+     docker-compose up test
+     ```
+
+**Result:**
+
+After container assembly it should log that script is starting, then working and sleeping 5 seconds and then 
+correct exit with code 0.
+
+Correct log example:
+```log
+test-1  | [2025-01-21 09:40:00,674][INFO] main.py:98 | Script starting
+test-1  | [2025-01-21 09:40:00,676][INFO] main.py:87 | Script self test is working. Sleeping 5 seconds
+test-1  | [2025-01-21 09:40:05,679][INFO] main.py:89 | Script self test finished
+test-1 exited with code 0
+
+```
+
+---
+
+### **Add users to workspaces and channels** (*add-users*)
 
 1. **Prepare the instructions file**  
    - Open the `add_users_instruction.csv` file.  
@@ -112,7 +140,7 @@ assigned to channels from `add_users_instruction.csv` file.
 ---
 
 
-### **Assign users as workspace owners and admins**
+### **Assign users as workspace owners and admins** (*assign-admins*)
 
 1. **Prepare the instructions file**  
    - Open the `assign_user_admin_instruction.csv` file.  
@@ -131,3 +159,53 @@ assigned to channels from `add_users_instruction.csv` file.
 After execution users from `assign_user_admin_instruction.csv` file would be assigned corresponding roles in their workspace.
 
 ---
+
+### **Invite new users to workspaces** (*invite-new-users*)
+
+This script would create new users in slack and invite them to workspace from `invite_new_user_instruction.csv` file.
+Currently existing users would be ignored, as this would violate the purpose of the script - 
+create new user and trigger invitation email. If you need to invite existing users, use `invite_new_user_instruction.csv` file.
+
+1. **Prepare the instructions file**  
+   - Open the `invite_new_user_instruction.csv` file.  
+   - Populate it with `workspace_name`, `workspace_slack_id`, `channel_name`, `channel_slack_id`, `user_email`, 
+`user_name`, `title`, `section`, `location` values.
+   - Each line is a relation between workspace-channel-user. A single user can have several lines
+   which denote several channels user would be added to.
+   
+2. **Run process**  
+   - Execute the following command to invite new users to slack:
+   - **All currently active users would be ignored!**
+     ```bash
+     docker-compose up invite-new-users
+     ```
+
+**Result:**  
+
+
+After execution users from `invite_new_user_instruction.csv` file would be created and assigned to corresponding channels.
+Also user data would be filled from `invite_new_user_instruction.csv` file. 
+
+---
+
+### **Unassign email from user** (*change-deactivated-emails*)
+
+This script would change email address of deactivated user to a new and invalid one. 
+This is done for the purpose of creating a new account for this user and invite this account to workspace.
+Alternative to it - is account deletion, however it could be only done automatically.
+
+1. **Prepare the instructions file**  
+   - Open the `change_deactivated_user_email_instruction.csv` file.  
+   - Populate it with `user_email` and `user_slack_id` values.
+   - Each line is a meant for a single user.
+   
+2. **Run process**  
+   - Execute the following command to unassign deactivated user email:
+   - **All active users would be ignored!**
+     ```bash
+     docker-compose up change-deactivated-emails
+     ```
+
+**Result:**
+
+After execution users' accounts from instruction file would be changed and marked as deactivated.
