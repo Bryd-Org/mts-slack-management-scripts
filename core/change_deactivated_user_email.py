@@ -22,7 +22,9 @@ async def change_deactivated_users_email_processor(
         )
 
         try:
-            await slack_data_manager.verify_deactivated_user_email(entry.user_email)
+            await slack_data_manager.verify_deactivated_user_email(
+                entry.user_email, entry.user_slack_id
+            )
         except UserIsActiveError:
             log.error(f"User '{entry.user_email}' is currently active!")
             continue

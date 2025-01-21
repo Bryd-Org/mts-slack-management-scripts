@@ -27,6 +27,7 @@ class UserIsActiveError(ValueError):
 class UserAlreadyExistsError(ValueError):
     pass
 
+
 class MultipleUsersWithSameEmailError(ValueError):
     pass
 
@@ -182,12 +183,14 @@ class SlackConnectionManager:
         if user_data:
             raise UserAlreadyExistsError
 
-    async def verify_deactivated_user_email(self, user_email: str) -> None:
-        user_data = await self._search_user(user_email)
+    async def verify_deactivated_user_email(
+        self, user_email: str, search_id: str = None
+    ) -> None:
+        user_data = await self._search_user(user_email, search_id)
         if user_data and user_data["active"]:
             raise UserIsActiveError
 
-    async def _search_user(self, user_email: str) -> dict | None:
+    async def _search_user(self, user_email: str, search_id: str = None) -> dict | None:
         await self._debounce("scim_search_users", 20)
         filter_query = f"email co {user_email}"
 
@@ -202,8 +205,14 @@ class SlackConnectionManager:
         if not existing_users:
             return
 
-        if len(existing_users) > 1:
-            raise MultipleUsersWithSameEmailError(f"Multiple users found with email {user_email}")
+        if len(existing_users) > 1 and not search_id:
+            raise MultipleUsersWithSameEmailError(
+                f"Multiple users found with email {user_email}"
+            )
+        elif len(existing_users) > 1:
+            existing_users = [
+                user for user in existing_users if user["id"] == search_id
+            ]
 
         user = existing_users[0]
         return user
