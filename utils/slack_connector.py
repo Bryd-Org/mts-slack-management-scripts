@@ -9,7 +9,7 @@ from slack_sdk.scim import SCIMClient, User as ScimUser
 from data_models.channel import Channel
 from data_models.user import User
 from data_models.workspace import Workspace
-from .config import log
+from .config import log, settings as s
 
 
 class BadUsernameError(ValueError):
@@ -69,9 +69,10 @@ class SlackConnectionManager:
             sleep_time = (
                 (60 / rate_limit_per_minute) - time_since_last_call.total_seconds() + 1
             )
-            log.info(
-                f"Sleeping for {sleep_time} seconds to avoid rate limit for '{function_name}'"
-            )
+            if s.LOG_DEBOUNCING:
+                log.info(
+                    f"Sleeping for {sleep_time} seconds to avoid rate limit for '{function_name}'"
+                )
             await asyncio.sleep(sleep_time)
 
         self._debounce_data[function_name] = current_time
@@ -183,16 +184,14 @@ class SlackConnectionManager:
         if user_data:
             raise UserAlreadyExistsError
 
-    async def verify_deactivated_user_email(
-        self, user_email: str, search_id: str = None
-    ) -> None:
-        user_data = await self._search_user(user_email, search_id)
+    async def verify_deactivated_user_email(self, user_email: str) -> None:
+        user_data = await self._search_user(user_email)
         if user_data and user_data["active"]:
             raise UserIsActiveError
 
-    async def _search_user(self, user_email: str, search_id: str = None) -> dict | None:
+    async def _search_user(self, user_email: str) -> dict | None:
         await self._debounce("scim_search_users", 20)
-        filter_query = f"email co {user_email}"
+        filter_query = f"email eq {user_email}"
 
         response = self._scim_client.search_users(
             count=10, start_index=0, filter=filter_query
@@ -205,14 +204,10 @@ class SlackConnectionManager:
         if not existing_users:
             return
 
-        if len(existing_users) > 1 and not search_id:
+        if len(existing_users) > 1:
             raise MultipleUsersWithSameEmailError(
                 f"Multiple users found with email {user_email}"
             )
-        elif len(existing_users) > 1:
-            existing_users = [
-                user for user in existing_users if user["id"] == search_id
-            ]
 
         user = existing_users[0]
         return user

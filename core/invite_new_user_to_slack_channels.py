@@ -55,6 +55,7 @@ async def invite_new_users_processor(
         processable_entry = data_to_work_on.get(key)
 
         if not processable_entry:
+            log.info(f"Found new user {csv_entry.user_email} for creation")
             scim_user_data = {
                 "username": csv_entry.user_email.split("@")[0],
                 "display_name": csv_entry.user_name,
@@ -81,6 +82,8 @@ async def invite_new_users_processor(
     # {email: slack_id}
     hereby_invited_users: dict[str, str] = {}
     users_to_scim_update: dict[str, dict] = {}
+
+    failed_invites: list[str] = []
 
     for entry in data_to_work_on.values():
         if entry.user_email in hereby_invited_users:
@@ -111,6 +114,7 @@ async def invite_new_users_processor(
                 log.exception(
                     f"Slack failed to invite user '{entry.user_email}' to workspace '{entry.workspace_slack_id}': {e}"
                 )
+                failed_invites.append(entry.user_email)
                 continue
             users_to_scim_update[new_user_id] = entry.scim_user_data
             hereby_invited_users[entry.user_email] = new_user_id
@@ -126,3 +130,7 @@ async def invite_new_users_processor(
             await slack_data_manager.update_user(user_data=scim_user)
         except Exception as e:
             log.exception(f"Failed to fill SCIM data for user '{user_id}': {e}")
+
+    log.info(f"Finished processing all users")
+    if failed_invites:
+        log.info(f"Failed invites: {', '.join(failed_invites)}")

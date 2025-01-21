@@ -4,3 +4,5 @@
     ENABLE_DOCS = true
 
     SLACK_USER_TOKEN = ""
+
+    LOG_DEBOUNCING = false
