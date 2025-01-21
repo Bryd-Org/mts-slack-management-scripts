@@ -27,6 +27,9 @@ class UserIsActiveError(ValueError):
 class UserAlreadyExistsError(ValueError):
     pass
 
+class MultipleUsersWithSameEmailError(ValueError):
+    pass
+
 
 class SlackConnectionManager:
     def __init__(self, token: str):
@@ -172,7 +175,10 @@ class SlackConnectionManager:
         return created_user_id
 
     async def verify_user_not_exists_in_slack(self, user_email: str) -> None:
-        user_data = await self._search_user(user_email)
+        try:
+            user_data = await self._search_user(user_email)
+        except MultipleUsersWithSameEmailError as e:
+            raise UserAlreadyExistsError(e)
         if user_data:
             raise UserAlreadyExistsError
 
@@ -197,8 +203,7 @@ class SlackConnectionManager:
             return
 
         if len(existing_users) > 1:
-            log.warning(f"Multiple users found with email {user_email}")
-            raise Exception("Multiple users found with email")
+            raise MultipleUsersWithSameEmailError(f"Multiple users found with email {user_email}")
 
         user = existing_users[0]
         return user
