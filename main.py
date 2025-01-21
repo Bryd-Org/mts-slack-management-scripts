@@ -83,6 +83,17 @@ def invite_new_users():
     )
 
 
+async def selftest():
+    log.info("Script self test is working. Sleeping 5 seconds")
+    await asyncio.sleep(5)
+    log.info("Script self test finished")
+
+
+@app.command(name="test")
+def container_test():
+    asyncio.run(selftest())
+
+
 if __name__ == "__main__":
     log.info("Script starting")
     app()

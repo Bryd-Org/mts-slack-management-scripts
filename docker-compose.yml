@@ -30,3 +30,11 @@ services:
       - ./.secrets.toml:/app/.secrets.toml
     command: python main.py invite-new-users
     restart: "no"
+
+  test:
+    build: .
+    volumes:
+      - ./invite_new_user_instruction.csv:/app/invite_new_user_instruction.csv
+      - ./.secrets.toml:/app/.secrets.toml
+    command: python main.py test
+    restart: "no"
