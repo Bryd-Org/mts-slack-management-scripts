@@ -9,5 +9,5 @@ class User(BaseSlackModel):
     location: str | None = None
 
     @property
-    def db_collection(self) -> str:
-        return "users"
+    def of_type(self) -> str:
+        return "user"

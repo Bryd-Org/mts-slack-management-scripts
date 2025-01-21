@@ -8,7 +8,7 @@ class BaseSlackModel(BaseModel):
     name: str
 
     @property
-    def db_collection(self) -> str:
+    def of_type(self) -> str:
         raise NotImplementedError
 
     def __hash__(self):

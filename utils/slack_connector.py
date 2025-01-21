@@ -1,14 +1,15 @@
 import asyncio
 import re
 from datetime import datetime, UTC
+from typing import Type
 
 from slack_sdk import WebClient
 from slack_sdk.scim import SCIMClient, User as ScimUser
 
-from .config import log
 from data_models.channel import Channel
 from data_models.user import User
 from data_models.workspace import Workspace
+from .config import log
 
 
 class BadUsernameError(ValueError):
@@ -16,6 +17,14 @@ class BadUsernameError(ValueError):
 
 
 class UnknownSlackUserCreationError(ValueError):
+    pass
+
+
+class UserIsActiveError(ValueError):
+    pass
+
+
+class UserAlreadyExistsError(ValueError):
     pass
 
 
@@ -27,6 +36,16 @@ class SlackConnectionManager:
         self._slack_user_client = WebClient(token=token)
         self._scim_client = SCIMClient(token=token)
         self._debounce_data = {}
+
+    async def _log_creation(
+        self,
+        model: Type[User | Workspace | Channel],
+        unique_designator: str,
+        created_entity_id: str,
+    ) -> None:
+        log.info(
+            f"Created {model.of_type} in slack for {unique_designator} with id {created_entity_id}"
+        )
 
     async def _debounce(self, function_name: str, rate_limit_per_minute: int):
         """
@@ -54,35 +73,40 @@ class SlackConnectionManager:
         self._debounce_data[function_name] = current_time
 
     @staticmethod
-    def _create_scim_user(
+    def fill_scim_user(
         username: str,
         display_name: str,
         email: str,
-        title: str,
-        location: str,
-        section: str,
-    ):
+        id: str = None,
+        name: str = None,
+        title: str = None,
+        location: str = None,
+        section: str = None,
+        active: bool = False,
+    ) -> ScimUser:
 
-        user_data = {
-            "schemas": [
+        scim_user = ScimUser(
+            id=id,
+            schemas=[
                 "urn:scim:schemas:core:1.0",
                 "urn:scim:schemas:extension:enterprise:1.0",
             ],
-            "userName": username.strip(),
-            "displayName": display_name.strip(),
-            "title": title,
-            "emails": [{"value": email, "primary": True}],
-            "active": False,
-            "unknown_fields": {
+            userName=username.strip(),
+            name=name.strip() if name else None,
+            displayName=display_name.strip(),
+            title=title,
+            emails=[{"value": email, "primary": True}],
+            active=active,
+            unknown_fields={
                 "urn:scim:schemas:extension:enterprise:1.0": {
                     # "employeeNumber": user.extention,
                     "department": location,
                     "division": section,
                 },
             },
-        }
+        )
 
-        return ScimUser(**user_data)
+        return scim_user
 
     async def _create_slack_user(self, scim_user: ScimUser) -> str:
         await self._debounce("create_user", 20)
@@ -114,16 +138,8 @@ class SlackConnectionManager:
             BadUsernameError: If the username is invalid
             UnknownSlackUserCreationError: If the user could not be created
         """
-        existing_user_data = await self.verify_user_not_exists_in_slack(user)
 
-        if existing_user_data:
-            slack_id = existing_user_data["id"]
-            log.info(
-                f"User {user.get('userName')} already exists in Slack, slack_id={slack_id}"
-            )
-            return slack_id
-
-        scim_user = self._create_scim_user(
+        scim_user = self.fill_scim_user(
             username=user.name,
             display_name=user.name,
             email=user.email,
@@ -139,7 +155,7 @@ class SlackConnectionManager:
             log.warning(
                 f"Full name is too long for user {user.email}. Using short name '{short_username}'."
             )
-            new_scim_user = self._create_scim_user(
+            new_scim_user = self.fill_scim_user(
                 username=short_username,
                 display_name=user.name,
                 email=user.email,
@@ -155,21 +171,19 @@ class SlackConnectionManager:
         log.info(f"User {user.email} created successfully. Slack ID: {created_user_id}")
         return created_user_id
 
-    async def verify_user_not_exists_in_slack(self, user: User) -> dict | None:
-        """
-        Verifies if a user does not exist in Slack.
+    async def verify_user_not_exists_in_slack(self, user_email: str) -> None:
+        user_data = await self._search_user(user_email)
+        if user_data:
+            raise UserAlreadyExistsError
 
-        Args:
-            user: The user to verify
+    async def verify_deactivated_user_email(self, user_email: str) -> None:
+        user_data = await self._search_user(user_email)
+        if user_data and user_data["active"]:
+            raise UserIsActiveError
 
-        Returns:
-            The Slack ID of the existing user if found, otherwise None
-
-        Raises:
-            Exception: If multiple users are found with the same email
-        """
+    async def _search_user(self, user_email: str) -> dict | None:
         await self._debounce("scim_search_users", 20)
-        filter_query = f"email co {user.email}"
+        filter_query = f"email co {user_email}"
 
         response = self._scim_client.search_users(
             count=10, start_index=0, filter=filter_query
@@ -183,11 +197,10 @@ class SlackConnectionManager:
             return
 
         if len(existing_users) > 1:
-            log.warning(f"Multiple users found with email {user.email}")
+            log.warning(f"Multiple users found with email {user_email}")
             raise Exception("Multiple users found with email")
 
         user = existing_users[0]
-
         return user
 
     async def deactivate_user(self, user: User):
@@ -332,7 +345,7 @@ class SlackConnectionManager:
             team_id=main_workspace.slack_id,
         )
 
-    async def add_user_to_team(
+    async def add_user_to_workspace(
         self, user: User, workspace: Workspace, channel_slack_ids: list[str]
     ):
         """
@@ -349,13 +362,13 @@ class SlackConnectionManager:
         Raises:
             Exception: If the user could not be added to the workspace.
         """
-        await self.add_user_to_team_by_ids(
+        await self.add_user_to_workspace_by_ids(
             user_id=user.slack_id,
             workspace_id=workspace.slack_id,
             channel_slack_ids=channel_slack_ids,
         )
 
-    async def add_user_to_team_by_ids(
+    async def add_user_to_workspace_by_ids(
         self, user_id: str, workspace_id: str, channel_slack_ids: list[str]
     ):
         """
@@ -377,7 +390,9 @@ class SlackConnectionManager:
             channel_ids=channel_slack_ids,
         )
 
-    async def invite_user_to_channel(self, user_id: str, channel_slack_id: str):
+    async def invite_user_to_channel_of_same_workspace(
+        self, user_id: str, channel_slack_id: str
+    ):
         """
         Invites a user to channels in a workspace in Slack by IDs.
 
@@ -467,3 +482,34 @@ class SlackConnectionManager:
             team_id=workspace_id,
             user_id=user_id,
         )
+
+    async def update_user(self, user_data: ScimUser):
+        await self._debounce("update_user", 20)
+        response = self._scim_client.update_user(user=user_data)
+
+        if response.status_code != 200:
+            raise ValueError(response.underlying.body["Errors"])
+
+    async def invite_new_user_to_workspace(
+        self,
+        user_email: str,
+        team_id: str,
+        channel_ids: list[str],
+        email_password_policy_enabled: bool = False,
+        resend_invitation_enabled: bool = False,
+    ) -> str:
+        await self._debounce("admin_users_invite", 20)
+        self._slack_user_client.admin_users_invite(
+            team_id=team_id,
+            email=user_email,
+            channel_ids=channel_ids,
+            email_password_policy_enabled=email_password_policy_enabled,
+            resend=resend_invitation_enabled,
+        )
+
+        created_user = await self._search_user(user_email)
+
+        if not created_user:
+            raise ValueError(f"New user with email '{user_email}' is not found")
+
+        return created_user["id"]

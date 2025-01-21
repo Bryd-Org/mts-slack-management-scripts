@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-from data_models.instruction_entries import AddUserInstructionEntry
 from utils.config import log
 from utils.csv_manager import CSVInstructionManager
 from utils.slack_connector import SlackConnectionManager
@@ -26,20 +25,18 @@ async def add_already_active_user_to_channel(
 ):
     for channel_id in entry.channels_slack_ids:
         log.info(f"Inviting user {entry.user_slack_id} to channel {channel_id}")
-        await slack_data_manager.invite_user_to_channel(
+        await slack_data_manager.invite_user_to_channel_of_same_workspace(
             user_id=entry.user_slack_id,
             channel_slack_id=channel_id,
         )
 
 
-async def add_users_to_ws_channels(
+async def add_users_to_ws_channels_processor(
     slack_data_manager: SlackConnectionManager,
     instructions: CSVInstructionManager,
 ):
-    log.info("Starting CSV instructions file parsing")
-
     data_to_work_on = {}
-    for csv_entry in instructions.read_entries(AddUserInstructionEntry):
+    for csv_entry in instructions.yield_add_user_instructions():
         # each line in CSV represents a user-channel relation
         # since we could add a user to multiple channel at once we need to collect all channel IDs for a single user
         key = (csv_entry.workspace_slack_id, csv_entry.user_slack_id)
@@ -64,7 +61,7 @@ async def add_users_to_ws_channels(
         # If user is a member of multiple channels, they would be added to all of them
         log.info(f"Adding user {entry.user_slack_id} to {entry.workspace_slack_id}")
         try:
-            await slack_data_manager.add_user_to_team_by_ids(
+            await slack_data_manager.add_user_to_workspace_by_ids(
                 workspace_id=entry.workspace_slack_id,
                 user_id=entry.user_slack_id,
                 channel_slack_ids=entry.channels_slack_ids,

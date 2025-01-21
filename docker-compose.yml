@@ -3,7 +3,6 @@ services:
     build: .
     volumes:
       - ./add_users_instruction.csv:/app/add_users_instruction.csv
-      - ./assign_user_admin_instruction.csv:/app/assign_user_admin_instruction.csv
       - ./.secrets.toml:/app/.secrets.toml
     command: python main.py add-users
     restart: "no"
@@ -11,8 +10,23 @@ services:
   assign-admins:
     build: .
     volumes:
-      - ./add_users_instruction.csv:/app/add_users_instruction.csv
       - ./assign_user_admin_instruction.csv:/app/assign_user_admin_instruction.csv
       - ./.secrets.toml:/app/.secrets.toml
     command: python main.py assign-admins
+    restart: "no"
+
+  change-deactivated-emails:
+    build: .
+    volumes:
+      - ./change_deactivated_user_email_instruction.csv:/app/change_deactivated_user_email_instruction.csv
+      - ./.secrets.toml:/app/.secrets.toml
+    command: python main.py change-deactivated-emails
+    restart: "no"
+
+  invite-new-users:
+    build: .
+    volumes:
+      - ./invite_new_user_instruction.csv:/app/invite_new_user_instruction.csv
+      - ./.secrets.toml:/app/.secrets.toml
+    command: python main.py invite-new-users
     restart: "no"

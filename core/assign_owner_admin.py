@@ -4,7 +4,7 @@ from utils.csv_manager import CSVInstructionManager
 from utils.slack_connector import SlackConnectionManager
 
 
-async def assign_owner_admin(
+async def assign_owner_admin_processor(
     slack_data_manager: SlackConnectionManager,
     instructions: CSVInstructionManager,
 ):
@@ -15,7 +15,7 @@ async def assign_owner_admin(
         "admin": slack_data_manager.make_user_admin,
     }
 
-    for entry in instructions.read_entries(AssignAdminOwnerInstructionEntry):
+    for entry in instructions.yield_assign_admin_owner_instructions():
         if entry.user_slack_id in processed_user_ids:
             log.error(f"User {entry.user_email} has already been processed!")
             continue

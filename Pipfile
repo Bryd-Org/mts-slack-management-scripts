@@ -11,4 +11,10 @@ slack-sdk = "*"
 slack-bolt = "*"
 
 [dev-packages]
-black = "*"
+black = "==23.3"
+
+[requires]
+python_version = "3.11"
+
+[pipenv]
+allow_prereleases = false

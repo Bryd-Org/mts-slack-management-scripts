@@ -10,8 +10,8 @@ class Channel(BaseSlackModel):
     additional_workspaces: list[str]
 
     @property
-    def db_collection(self) -> str:
-        return "channels"
+    def of_type(self) -> str:
+        return "channel"
 
     @property
     def prepared_name(self):

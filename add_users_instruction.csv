@@ -1,9 +1,9 @@
 workspace_name,workspace_slack_id,channel_name,channel_slack_id,user_email,user_slack_id
-MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_1@example.com,U111111111
-MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_2@example.com,U222222222
-MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_3@example.com,U333333333
-MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_4@example.com,U444444444
-MTS-IT,T12345678,it-all-technical-team,C12345678,mts-user_5@example.com,U555555555
-MTS-IT,T12345678,it-all-technical-team,C98765432,mts-user_4@example.com,U444444444
-MTS-IT,T12345678,it-all-technical-team,C98765432,mts-user_5@example.com,U555555555
+workspace,T12345678,channel-name,C12345678,user_1@example.com,U111111111
+workspace,T12345678,channel-name,C12345678,user_2@example.com,U222222222
+workspace,T12345678,channel-name,C12345678,user_3@example.com,U333333333
+workspace,T12345678,channel-name,C12345678,user_4@example.com,U444444444
+workspace,T12345678,channel-name,C12345678,user_5@example.com,U555555555
+workspace,T12345678,channel-name,C98765432,user_4@example.com,U444444444
+workspace,T12345678,channel-name,C98765432,user_5@example.com,U555555555
 
